@@ -51,6 +51,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+CSRF_TRUSTED_ORIGINS = ['https://celestialnavigationuec.azurewebsites.net']
+
+
 ROOT_URLCONF = 'CelestialNavigation.urls'
 
 TEMPLATES = [
