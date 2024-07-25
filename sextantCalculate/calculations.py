@@ -84,13 +84,15 @@ def calculate_position(star_observations):
         SHA = NavStars[starNum][0]  # lookup the star numbers & return SHA
         UT1 = obs[i][2]  # TODO implement UTC to UT1 calculation
         JD_UT1 = (UT1 / 86400.0) + UNIX_epoch_JD  # UT1 to Julian date
-        T_u = (JD_UT1 - 2451545.0)  # from Sideral Time wiki page
-        ERA = 360 * (0.7790572732640 + 1.00273781191135448 * T_u)  # [deg]
-        GHA = (ERA + SHA) % 360.0  # TODO wrap from +180 to -180
+        T_u = (JD_UT1 - 2451545.0) / 36525.0  # Corrected time calculation
+        ERA = 360.0 * (0.7790572732640 + 1.00273781191135448 * T_u)  # [deg]
+        GHA = (ERA + SHA) % 360.0  # Wrap to 0-360 degrees
+        if GHA < 0:  # Ensure GHA is positive
+            GHA += 360.0
         obs[i][3] = GHA
 
-    A = np.zeros([numObs, numObs])  # initalize A as square matrix
-    B = np.zeros([numObs, 1])  # initalize B as column matrix
+    A = np.zeros([numObs, 3])  # initialize A as a 3-column matrix
+    B = np.zeros([numObs, 1])  # initialize B as a column matrix
 
     for i in range(numObs):  # populate A and B
         starNum = obs[i][0]  # which star is used for this observation
@@ -100,17 +102,26 @@ def calculate_position(star_observations):
         A[i] = [np.cos(DEC) * np.cos(GHA), np.cos(DEC) * np.sin(GHA), np.sin(DEC)]
         B[i] = [np.sin(Ho)]
 
-    if np.linalg.det(A) < 0.1:  # check for matrix invertability
+    if np.linalg.det(A) < 1e-10:  # check for matrix invertibility
         raise ValueError("Solution is ill-defined")
 
-    A_inv = np.linalg.inv(A)  
+    A_inv = np.linalg.pinv(A)  # use pseudo-inverse for stability
     X = np.dot(A_inv, B)  # solve matrix equation for cartesian position
 
-    x, y, z = X[0], X[1], X[2]
+    x, y, z = X[0][0], X[1][0], X[2][0]
     lat = np.arctan2(z, np.sqrt(x * x + y * y)) * rad2deg
     lon = np.arctan2(y, x) * rad2deg
 
-    return lat[0], lon[0]  # return the estimated position
+    # Adjust longitude by subtracting from 180 degrees
+    lon = 180 - lon
+
+    # Normalize longitude to be within -180 to 180
+    if lon > 180:
+        lon -= 360
+    elif lon < -180:
+        lon += 360
+
+    return lat, lon  # return the estimated position
 
 # Test the function
 star_observations = [

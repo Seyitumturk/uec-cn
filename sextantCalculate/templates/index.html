@@ -1,3 +1,4 @@
+<!-- index.html -->
 {% load static %}
 
 <!DOCTYPE html>
@@ -17,13 +18,13 @@
     <div class="container">
         <div class="header">
             <img id="logo" src="{% static 'sextantCalculate/img/logo.png' %}" alt="Logo">
-            <h1>Celestial Navigation with UECCC</h1>
+            <h1>Celestial Navigation with UECCCsss</h1>
         </div>
         <form method="post" id="myForm">
             {% csrf_token %}
             {% for form in forms %}
                 <div class="form-group">
-                    {{ form.label_tag }} {{ form }}
+                    {{ form.as_p }}
                 </div>
             {% endfor %}
             <button type="submit">Calculate</button>
@@ -36,22 +37,14 @@
         <img id="footerLogo" src="{% static 'sextantCalculate/img/footerLogo.png' %}" alt="Footer Logo">
     </div>
 
-
- <script>
-    document.getElementById('myForm').addEventListener('submit', function(e) {
-    e.preventDefault();  // Prevent the form from immediately submitting
-
-    // Show the loading video
-    document.getElementById('loadingLogo').style.display = 'block';
-
-    // After 3 seconds (3000 milliseconds), submit the form
-    setTimeout(function() {
-        e.target.submit();  // 'e.target' is the form
-    }, 3000);
-});
-
-    
- </script>
-    
+    <script>
+        document.getElementById('myForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            document.getElementById('loadingLogo').style.display = 'block';
+            setTimeout(function() {
+                e.target.submit();
+            }, 3000);
+        });
+    </script>
 </body>
 </html>

@@ -1,26 +1,24 @@
 from django.shortcuts import render
 from .forms import ObservationForm
+from .utils import calculate_position
 
 import time
 import math
 import numpy as np
 
-
 def index_view(request):
     if request.method == 'POST':
-        forms = [ObservationForm(request.POST, prefix=str(x)) for x in range(3)]  # Assuming 3 observations
+        forms = [ObservationForm(request.POST, prefix=str(x)) for x in range(3)]
         if all([form.is_valid() for form in forms]):
-            star_observations = [(form.cleaned_data['star_number'], form.cleaned_data['elevation'], time.time()) for form in forms]
+            star_observations = [(int(form.cleaned_data['star_number']), form.cleaned_data['elevation'], time.time()) for form in forms]
             try:
-                latitude, longitude = calculate_position(star_observations, force=request.POST.get('force', False))
+                latitude, longitude = calculate_position(star_observations)
             except ValueError as e:
-                print(e) 
                 return render(request, 'error.html', {'error_message': str(e)})
             return render(request, 'result.html', {'latitude': latitude, 'longitude': longitude})
     else:
-        forms = [ObservationForm(prefix=str(x)) for x in range(3)]  # Assuming 3 observations
+        forms = [ObservationForm(prefix=str(x)) for x in range(3)]
     return render(request, 'index.html', {'forms': forms})
-
 def calculate_position(star_observations, force=False):
     # Constants and data
     UNIX_epoch_JD = 2440587.5
