@@ -6,7 +6,7 @@ from astropy.coordinates import Latitude, Longitude, EarthLocation, AltAz, SkyCo
 
 def load_star_data(csv_file='sextantCalculate/NavigationalStars.csv'):
     NavStars = np.genfromtxt(csv_file, delimiter=',', dtype=None, encoding='utf-8')
-    NavStars = np.delete(NavStars, 0, axis=0)  # delete the label row
+    NavStars = np.delete(NavStars, 0, axis=0)  # delete the label rows
     return NavStars
 
 def calculate_position(star_observations, csv_file='sextantCalculate/NavigationalStars.csv'):
